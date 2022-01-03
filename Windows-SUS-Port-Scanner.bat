@@ -25,8 +25,11 @@ if "!errorlevel!"=="0" (
         for /f "tokens=1,2 delims=:" %%B in ("%%~A") do (
             echo        IP: %%~B    Port: %%~C
             powershell "[console]::beep(3000,100)"
-            netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B/ / %%~C" dir=in action=block remoteip=%%~B/ / %%~C
-            netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B/ / %%~C" dir=out action=block remoteip=%%~B/ / %%~C
+            netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=in remoteip=%%~B remoteport=%%~C action=block
+            netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=out remoteip=%%~B remoteport=%%~C action=block
+			
+			netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=in localip=%%~B localport=%%~C action=block
+            netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=out localip=%%~B localport=%%~C action=block
         )
     )
 ) else (
