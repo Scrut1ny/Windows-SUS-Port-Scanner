@@ -27,8 +27,7 @@ if "!errorlevel!"=="0" (
             powershell "[console]::beep(3000,100)"
             netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=in remoteip=%%~B remoteport=%%~C action=block
             netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=out remoteip=%%~B remoteport=%%~C action=block
-			
-			netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=in localip=%%~B localport=%%~C action=block
+	    netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=in localip=%%~B localport=%%~C action=block
             netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=out localip=%%~B localport=%%~C action=block
         )
     )
