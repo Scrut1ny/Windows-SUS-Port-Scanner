@@ -11,24 +11,24 @@ setlocal enabledelayedexpansion
 title Bad Port Scanner
 cls
 
->nul 2>&1 net sess||(powershell saps '%0'-Verb RunAs&exit /b)
+>nul 2>&1 net sess || (powershell saps '%0' -Verb RunAs & goto :eof)
 
 set "portlist=:22 :1080 :2745 :3127 :3389 :4444 :5554 :8866 :9898 :9988 :12345 :27374 :31337"
 
 :portscan
 echo [1;1H
-netstat -ano | findstr "%portlist%" | find /v "[" >nul
-if "!errorlevel!"=="0" (
+set "tmpfile=%temp%\portscan.tmp"
+netstat -ano | findstr "%portlist%" | find /v "[" >"%tmpfile%"
+if not errorlevel 1 (
     color 04
     echo   [+] Suspicious connections found:
-    for /f "tokens=3" %%A in ('netstat -ano ^| findstr "%portlist%" ^| find /v "["') do (
+    for /f "tokens=3" %%A in (%tmpfile%) do (
         for /f "tokens=1,2 delims=:" %%B in ("%%~A") do (
-            echo        IP: %%~B    Port: %%~C
+            set "ip=%%~B"
+            set "port=%%~C"
+            echo    IP: !ip!    Port: !port!
             powershell "[console]::beep(3000,100)"
-            netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=in remoteip=%%~B remoteport=%%~C action=block
-            netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=out remoteip=%%~B remoteport=%%~C action=block
-	    netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=in localip=%%~B localport=%%~C action=block
-            netsh advfirewall firewall add rule name="SUS CONNECTION: %%~B" protocol=TCP dir=out localip=%%~B localport=%%~C action=block
+            netsh advfirewall firewall add rule name="SUS CONNECTION: !ip!,!port!" protocol=TCP dir=inout localip=!ip! remoteip=!ip! localport=!port! remoteport=!port! action=block
         )
     )
 ) else (
@@ -36,6 +36,6 @@ if "!errorlevel!"=="0" (
     echo   [-] Connection Clean
 )
 
-choice /c:cq /d c /t 1 /n >nul
-if "!errorlevel!"=="2" exit /b
+del "%tmpfile%"
+timeout /t 1 >nul
 goto :portscan
